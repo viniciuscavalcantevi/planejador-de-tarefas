@@ -9,6 +9,8 @@ import { TaskCardList } from "./components/TaskCard";
 import { TaskDetailsDrawer } from "./components/TaskDetailsDrawer";
 import { ReportView } from "./components/ReportView";
 import { UserManagementView } from "./components/UserManagementView";
+import { CalendarView } from "./components/CalendarView";
+import { exportTasksToCSV } from "./lib/exportUtils";
 
 function TaskWorkspace() {
   const {
@@ -33,6 +35,7 @@ function TaskWorkspace() {
     page,
   } = useAppStore();
 
+  const [displayMode, setDisplayMode] = useState<"lista" | "calendario">("lista");
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   useEffect(() => {
     const goOffline = () => setIsOffline(true);
@@ -108,30 +111,43 @@ function TaskWorkspace() {
               const task = await createTask({ title: "Nova tarefa" });
               if (task) openTaskDetails(task.id);
             }}
+            displayMode={displayMode}
+            onToggleDisplayMode={setDisplayMode}
+            onExport={() => exportTasksToCSV(visibleTasks, members)}
           />
 
-          <TaskTable
-            tasks={visibleTasks}
-            members={members}
-            hasAnyTasks={tasks.length > 0}
-            filters={filters}
-            onOpen={openTaskDetails}
-            onToggleComplete={toggleComplete}
-            onUpdate={(taskId, input) => updateTask(taskId, input)}
-            onDuplicate={duplicateTask}
-            onDelete={deleteTask}
-            onCreate={createTask}
-            onClearFilters={clearFilters}
-          />
-          <TaskCardList
-            tasks={visibleTasks}
-            members={members}
-            hasAnyTasks={tasks.length > 0}
-            onOpen={openTaskDetails}
-            onToggleComplete={toggleComplete}
-            onCreate={createTask}
-            onClearFilters={clearFilters}
-          />
+          {displayMode === "calendario" ? (
+            <CalendarView
+              tasks={visibleTasks}
+              members={members}
+              onOpenTask={openTaskDetails}
+            />
+          ) : (
+            <>
+              <TaskTable
+                tasks={visibleTasks}
+                members={members}
+                hasAnyTasks={tasks.length > 0}
+                filters={filters}
+                onOpen={openTaskDetails}
+                onToggleComplete={toggleComplete}
+                onUpdate={(taskId, input) => updateTask(taskId, input)}
+                onDuplicate={duplicateTask}
+                onDelete={deleteTask}
+                onCreate={createTask}
+                onClearFilters={clearFilters}
+              />
+              <TaskCardList
+                tasks={visibleTasks}
+                members={members}
+                hasAnyTasks={tasks.length > 0}
+                onOpen={openTaskDetails}
+                onToggleComplete={toggleComplete}
+                onCreate={createTask}
+                onClearFilters={clearFilters}
+              />
+            </>
+          )}
         </>
       )}
 

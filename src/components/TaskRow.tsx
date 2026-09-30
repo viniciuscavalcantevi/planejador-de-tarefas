@@ -1,8 +1,9 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import { Copy, ExternalLink, MoreHorizontal, Paperclip, Trash2 } from "lucide-react";
+import { Copy, ExternalLink, MoreHorizontal, Paperclip, Trash2, CheckSquare } from "lucide-react";
 import { useState } from "react";
 import type { Task, WorkspaceMember } from "../types";
+import { PRESET_TAGS } from "../types";
 import { cn } from "../lib/utils";
 import { CompletionCheckbox } from "./CompletionCheckbox";
 import { PrioritySelect } from "./PrioritySelect";
@@ -34,6 +35,9 @@ export function TaskRow({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const done = task.status === "concluido";
 
+  const completedChecklist = (task.checklist || []).filter((i) => i.completed).length;
+  const totalChecklist = (task.checklist || []).length;
+
   return (
     <tr
       onClick={() => onOpen(task.id)}
@@ -49,7 +53,7 @@ export function TaskRow({
           label={task.title}
         />
       </td>
-      <td className="min-w-[220px] max-w-[320px] px-3 py-2.5 align-middle">
+      <td className="min-w-[220px] max-w-[340px] px-3 py-2.5 align-middle">
         <span
           title={task.title}
           className={cn(
@@ -59,6 +63,31 @@ export function TaskRow({
         >
           {task.title}
         </span>
+
+        {/* Tags e Indicador de Checklist */}
+        {((task.tags && task.tags.length > 0) || totalChecklist > 0) && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {task.tags?.map((tagId) => {
+              const tagObj = PRESET_TAGS.find((p) => p.id === tagId);
+              if (!tagObj) return null;
+              return (
+                <span
+                  key={tagId}
+                  className={cn("rounded-full border px-1.5 py-0.2 text-[10px] font-semibold", tagObj.color)}
+                >
+                  {tagObj.name}
+                </span>
+              );
+            })}
+
+            {totalChecklist > 0 && (
+              <span className="inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.2 text-[10px] font-medium text-gray-600">
+                <CheckSquare size={10} className="text-[#0066CC]" />
+                {completedChecklist}/{totalChecklist}
+              </span>
+            )}
+          </div>
+        )}
       </td>
       <td className="px-3 py-2.5 align-middle">
         <SourceSelect value={task.source} onChange={(v) => onUpdate(task.id, { source: v })} />

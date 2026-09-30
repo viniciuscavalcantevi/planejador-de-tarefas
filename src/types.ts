@@ -78,6 +78,21 @@ export interface WorkspaceMember {
 
 export const MAX_TASK_ASSIGNEES = 3;
 
+export interface ChecklistItem {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+export const PRESET_TAGS = [
+  { id: "urgencia", name: "Urgência", color: "bg-red-50 text-red-700 border-red-200" },
+  { id: "saude", name: "Saúde", color: "bg-blue-50 text-[#0066CC] border-blue-200" },
+  { id: "odonto", name: "Odonto", color: "bg-teal-50 text-teal-700 border-teal-200" },
+  { id: "financeiro", name: "Financeiro", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { id: "regulatorio", name: "Regulatório", color: "bg-purple-50 text-purple-700 border-purple-200" },
+  { id: "ti", name: "Tecnologia", color: "bg-amber-50 text-amber-700 border-amber-200" },
+];
+
 export interface Task {
   id: string;
   workspaceId: string;
@@ -92,6 +107,8 @@ export interface Task {
   startDate: string | null;
   dueDate: string | null;
   completedDate: string | null;
+  checklist?: ChecklistItem[];
+  tags?: string[];
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -170,6 +187,8 @@ export interface CreateTaskInput {
   assigneeIds?: string[];
   startDate?: string | null;
   dueDate?: string | null;
+  checklist?: ChecklistItem[];
+  tags?: string[];
 }
 
 export type UpdateTaskInput = Partial<
@@ -184,5 +203,7 @@ export type UpdateTaskInput = Partial<
     | "startDate"
     | "dueDate"
     | "completedDate"
+    | "checklist"
+    | "tags"
   >
 >;

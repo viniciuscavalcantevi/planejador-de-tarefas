@@ -1,4 +1,4 @@
-import { Plus, Search } from "lucide-react";
+import { Calendar, Download, List, Plus, Search } from "lucide-react";
 import type { TaskFilterState, WorkspaceMember } from "../types";
 import { TaskFilters } from "./TaskFilters";
 
@@ -17,6 +17,9 @@ interface TaskToolbarProps {
   onChangeFilters: (updater: (prev: TaskFilterState) => TaskFilterState) => void;
   onClearFilters: () => void;
   onNewTask: () => void;
+  displayMode: "lista" | "calendario";
+  onToggleDisplayMode: (mode: "lista" | "calendario") => void;
+  onExport: () => void;
 }
 
 export function TaskToolbar({
@@ -26,6 +29,9 @@ export function TaskToolbar({
   onChangeFilters,
   onClearFilters,
   onNewTask,
+  displayMode,
+  onToggleDisplayMode,
+  onExport,
 }: TaskToolbarProps) {
   return (
     <div className="flex flex-col gap-3 border-b border-border bg-surface px-4 py-3 sm:px-6">
@@ -36,14 +42,56 @@ export function TaskToolbar({
             {resultCount} {resultCount === 1 ? "tarefa encontrada" : "tarefas encontradas"}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onNewTask}
-          className="flex items-center gap-1.5 rounded-md bg-accent-500 px-3.5 py-2 text-sm font-medium text-white hover:bg-accent-600"
-        >
-          <Plus size={16} />
-          Nova tarefa
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Alternador Lista / Calendário */}
+          <div className="flex items-center rounded-md border border-gray-200 bg-gray-50/80 p-0.5 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => onToggleDisplayMode("lista")}
+              className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                displayMode === "lista"
+                  ? "bg-white text-[#0066CC] shadow-2xs"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <List size={14} />
+              Lista
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleDisplayMode("calendario")}
+              className={`flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                displayMode === "calendario"
+                  ? "bg-white text-[#0066CC] shadow-2xs"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <Calendar size={14} />
+              Calendário
+            </button>
+          </div>
+
+          {/* Exportar Excel / CSV */}
+          <button
+            type="button"
+            onClick={onExport}
+            title="Exportar tarefas para planilha Excel (.csv)"
+            className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 shadow-2xs transition-colors"
+          >
+            <Download size={14} className="text-[#0066CC]" />
+            Exportar
+          </button>
+
+          <button
+            type="button"
+            onClick={onNewTask}
+            className="flex items-center gap-1.5 rounded-md bg-[#0066CC] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-2xs hover:bg-[#00529b] transition-colors"
+          >
+            <Plus size={15} strokeWidth={2.5} />
+            Nova tarefa
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

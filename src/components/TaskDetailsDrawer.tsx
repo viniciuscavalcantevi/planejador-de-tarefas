@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { AlertCircle, Check, Loader2, X } from "lucide-react";
-import type { ActivityEntry, Attachment, Comment, Task, UpdateTaskInput, WorkspaceMember } from "../types";
+import type { ActivityEntry, Attachment, ChecklistItem, Comment, Task, UpdateTaskInput, WorkspaceMember } from "../types";
 import { taskFormSchema, type TaskFormValues } from "./taskFormSchema";
 import { CompletionCheckbox } from "./CompletionCheckbox";
 import { StatusSelect } from "./StatusSelect";
@@ -15,6 +15,8 @@ import { RichTextEditor } from "./RichTextEditor";
 import { AttachmentList } from "./AttachmentList";
 import { CommentSection } from "./CommentSection";
 import { ActivityTimeline } from "./ActivityTimeline";
+import { ChecklistSection } from "./ChecklistSection";
+import { TagSelector } from "./TagSelector";
 import { formatDateBR } from "../lib/taskRules";
 import { repository } from "../services";
 import { useToast } from "../store/ToastContext";
@@ -59,6 +61,9 @@ export function TaskDetailsDrawer({
   });
 
   const values = watch();
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(task.checklist ?? []);
+  const [tags, setTags] = useState<string[]>(task.tags ?? []);
+
   const normalizeDescription = (html: string) => (isEmptyRichText(html) ? "" : html);
   const descriptionDirty =
     normalizeDescription(description) !== normalizeDescription(task.description ?? "");
@@ -67,8 +72,20 @@ export function TaskDetailsDrawer({
   useEffect(() => {
     reset(toFormValues(task));
     setDescription(task.description ?? "");
+    setChecklist(task.checklist ?? []);
+    setTags(task.tags ?? []);
     setSaveState("idle");
   }, [task, reset]);
+
+  async function handleChecklistChange(newItems: ChecklistItem[]) {
+    setChecklist(newItems);
+    await onSave(task.id, { checklist: newItems });
+  }
+
+  async function handleTagsChange(newTags: string[]) {
+    setTags(newTags);
+    await onSave(task.id, { tags: newTags });
+  }
 
   useEffect(() => {
     let active = true;
@@ -226,6 +243,8 @@ export function TaskDetailsDrawer({
                 </Field>
               </div>
 
+              <TagSelector selectedTags={tags} onChange={handleTagsChange} />
+
               <div className="grid grid-cols-3 gap-3">
                 <Field label="Data de início">
                   <input
@@ -256,6 +275,10 @@ export function TaskDetailsDrawer({
               <Field label="Descrição">
                 <RichTextEditor value={description} onChange={setDescription} />
               </Field>
+
+              <section aria-labelledby="checklist-heading" className="border-t border-border pt-4">
+                <ChecklistSection items={checklist} onChange={handleChecklistChange} />
+              </section>
 
               <div className="flex items-center gap-2 border-t border-border pt-4">
                 <button
